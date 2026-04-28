@@ -1,0 +1,105 @@
+# Qt build files
+*.o
+*.obj
+Makefile
+Makefile.Debug
+Makefile.Release
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+
+# Build output directories
+build/
+build-*/
+debug/
+release/
+
+# Compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.app
+
+# Qt MOC / UIC / RCC generated files
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+
+# CMake (in case you switch later)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# Data files your program generates at runtime
+users.txt
+books.txt
+members.txt
+fines.txt
+transactions.txt
+reservations.txt
+reviews.txt
+settings.txt
+categories.txt
+*.bak_*
+report*.txt
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Visual Studio files
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio build output
+x64/
+x86/
+Win32/
+ARM/
+Debug/
+Release/
+ipch/
+*.VC.db
+*.VC.opendb
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Visual Studio IntelliSense
+*.ipch
+
+# Visual Studio code analysis
+*.nativecodeanalysis.xml
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+
+# Visual Studio coverage
+*.coverage
+*.coveragexml

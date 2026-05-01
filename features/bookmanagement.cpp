@@ -192,7 +192,7 @@ public:
 			cout << "Library is full" << endl;
 			return;
 		}
-		cout << "ADD BEW BOOK" << endl;
+		cout << "ADD NEW BOOK" << endl;
 		cin.ignore();
 
 		cout << "Title: ";
@@ -410,4 +410,9 @@ public:
 				cout << "Invalid option" << endl;
 		} while (true);
 	}
+};
+class Transection
+{
+	int book_id, member_id, transection_id;
+	string 
 };

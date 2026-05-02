@@ -129,7 +129,22 @@ public:
 	}
 };
 
-
+void loadfiledata()  //loading file data into books arr
+{
+	count = 0;
+	ifstream in;
+	in.open(file);
+	string line;
+	if (!in) return;
+	while (getline(in, line) && count < MAXBOOKS)
+	{
+		if (line.empty()) continue;   //to identify if string is empty
+		book booktoload;   //load details of book from file
+		if (booktoload.read(line))
+			books[count++] = booktoload;
+	}
+	in.close();
+}
 //manages all books
 class bookmanager
 {
@@ -154,22 +169,7 @@ public:
 	}
 
 	//file handling
-	void loadfiledata()  //loading file data into books arr
-	{
-		count = 0;
-		ifstream in;
-		in.open(file);
-		string line;
-		if (!in) return;
-		while (getline(in, line) && count < MAXBOOKS)
-		{
-			if (line.empty()) continue;   //to identify if string is empty
-			book booktoload;   //load details of book from file
-			if (booktoload.read(line))
-				books[count++] = booktoload;
-		}
-		in.close();
-	}
+	
 	void savefiledata() const    //saving data to file
 	{
 		ofstream out;
@@ -411,8 +411,148 @@ public:
 		} while (true);
 	}
 };
+<<<<<<< Updated upstream
 class Transection
 {
 	int book_id, member_id, transection_id;
 	string 
 };
+=======
+
+	//helper functions
+	int date_to_days(const string& date)
+	{
+		int day, month, year;
+		day = stoi(date.substr(0, 2)); 
+		month = stoi(date.substr(3, 2));
+		year = stoi(date.substr(6, 4));
+		return (year * 365 + month * 30 + day);//return days
+	}
+	string add_days_for_overdue(const string& date, int days)
+	{
+		int day, month, year;
+		day = stoi(date.substr(0, 2));
+		month = stoi(date.substr(3, 2));
+		year = stoi(date.substr(6, 4));
+		days += 14;//14 days above due date are allowed to return without fine
+
+		int days_in_months[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+		while (days > days_in_months[month])
+		{
+			days -= days_in_months[month]; m++;
+			if (m > 12)
+			{
+				m = 1; year++; //new year so update month and year
+			}
+		}
+		string dd, mm, yy;
+		dd = (days < 10 ? "0" : "") + to_string(days);
+		dd = (month < 10 ? "0" : "") + to_string(month);
+		yy = to_string(year);//back to dd/mm/yy
+		return days + "/" + month + "/" + year;
+	}
+	int days_overdue(const string& due_date, const string& date_of_return)
+	{
+		int difference;
+		difference = date_to_days(date_of_return) - date_to_days(due_date);
+		if (difference > 0)
+			return difference;//returned after due date
+		else
+			return 0;//returned on/before due date
+	}
+	class Transection
+	{
+		int transection_id, member_id, book_id;
+		string borrow_date, due_date, return_date, status_of_book;
+	public:
+		Transection()
+			: transection_id(0), member_id(0), book_id, borrow_date(""), 
+			due_date(""), return_date(""), status_of_book(""){}
+		Transection(int t_id, int m_id, int b_id, const string& b_date)
+			: transection_id(t_id), member_id(m_id), book_id(b_id), borrow_date(b_date)
+			, due_date(add_days_for_overdue(b_date, 14)), return_date(""), status_of_book("Borrowed") {}
+
+		int getBookId() const{
+			return book_id;
+		}
+		int getTransectionId()const{
+			return transection_id;
+		}
+		int getMemberId()const{
+			return member_id;
+		}
+		string getBorrowDate()const{
+			return borrow_date;
+		}
+		string getDueDate()const{
+			return due_date;
+		}
+		string getReturnDate()const{
+			return return_date;
+		}
+		string getStatusOfBook()const{
+			return status_of_book;
+		}
+		void setDueDate(const string& date) {
+			return_date = date;
+		}
+		void setStatusOfBook(const string& status) {
+			status_of_book = status;
+		}
+		void display() {
+			cout << "Transection Id: " << transection_id << endl;
+			cout << "Member Id: " << member_id << endl;
+			cout << "Book Id: " << book_id << endl;
+			cout << "Date of borrow: " << borrow_date << endl;
+			cout << "Due Date: " << due_date << endl;
+			cout << "Date of return: " << return_date << endl;
+			cout << "Status of book:" << status_of_book << endl;
+		}
+		//file handling
+		void DataEntry(ofstream& out) const //constant bcz DO NOT want it to change anything.
+		{
+			out << Transection_id << "|" << member_id << "|" << book_id << "|" << borrow_date << "|"
+				<< due_date << "|" << return_date << "|" << status_of_book << "|";
+		}
+		bool read(const string& line){
+			int index = 0; string data[7], input = "";
+			for (int i = 0; i < (int)line.size; i++)
+			{
+				if (line[i] == '|')
+				{
+					if (index >= 7)
+						return false;//edge case
+					data[index++] = input; input = "";
+				}
+				else
+					input += line[i];
+			}
+			data[index++] = input;
+
+			if (index != 7) return false;
+
+			transection_id = stoi(data[0]); member_id = stoi(data[1]);
+			book_id = stoi(data[2]); borrow_date = data[3];
+			due_date = data[4]; return_date = data[5]; 
+			status_of_book = data[6]; return true;
+		}
+	};
+
+	const int MAXTRANSECTIONS = 500;
+	class TransectionManager
+	{
+		Transection transections[MAXTRANSECTIONS];
+		int count, next_id;	string file;
+	public:
+		TransectionManager(const string& filename = "transection.txt")
+			:count(0), file(filename), next_id(1) {
+			loadfiledata();
+			for (int i = 0; < count; i++)
+			{
+				if(transections[i].getTransectionId()>=next_id)
+					next_id=transections[i].getTransectionId
+			}
+		}
+
+	};
+>>>>>>> Stashed changes

@@ -94,3 +94,5 @@ ipch/
 # Visual Studio coverage
 *.coverage
 *.coveragexml
+
+LibraryManagementSystem/

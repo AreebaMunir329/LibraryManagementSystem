@@ -157,15 +157,6 @@ public:
 	bookmanager(const string& filename = "books.txt") : count(0), file(filename), nextid(1)
 	{
 		loadfiledata();
-		for (int i = 0; i < count; i++)
-		{
-			if (books[i].getid() >= nextid)
-			{
-				nextid = books[i].getid() + 1;
-				//after restarting the window, nextid should not become 1
-				// else it should be 1 more than the highest id stored
-			}
-		}
 	}
 
 	//file handling
@@ -412,12 +403,7 @@ public:
 	}
 };
 <<<<<<< Updated upstream
-class Transection
-{
-	int book_id, member_id, transection_id;
-	string 
-};
-=======
+
 
 	//helper functions
 	int date_to_days(const string& date)
@@ -555,4 +541,4 @@ class Transection
 		}
 
 	};
->>>>>>> Stashed changes
+

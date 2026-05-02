@@ -228,7 +228,10 @@ public:
 		savefiledata();
 		cout << "NEw book added with ID: " << (nextid - 1) << endl;
 	}
-
+	book& getBook(int index)//added by 0521.
+	{
+		return books[index];
+	}
 	//remove book 
 	void removebook()
 	{
@@ -244,7 +247,7 @@ public:
 			return;
 		}
 
-		//moves beyond this point if index is vazlid
+		//moves beyond this point if index is valid
 		int issuedbooks = books[index].gettotalcpy() - books[index].getavailablecpy();
 		if (issuedbooks > 0)  //edge case handling
 		{
@@ -294,9 +297,9 @@ public:
 		string keyword;
 		cout << "Enter keyword to find: ";
 		getline(cin, keyword);
-		string lwrkeyword = lowercase(keyword);  //convert to lowercase for comparison
+		string lwrkeyword = lowercase(keyword);//convert to lowercase for comparison
 
-		int booksfound = 0;   //number of books found
+		int booksfound = 0; //number of books found
 		for (int i = 0; i < count; i++)
 		{
 			bool match = false;
@@ -402,8 +405,6 @@ public:
 		} while (true);
 	}
 };
-<<<<<<< Updated upstream
-
 
 	//helper functions
 	int date_to_days(const string& date)
@@ -446,23 +447,24 @@ public:
 		else
 			return 0;//returned on/before due date
 	}
-	class Transection
+
+	class Transaction
 	{
-		int transection_id, member_id, book_id;
+		int transaction_id, member_id, book_id;
 		string borrow_date, due_date, return_date, status_of_book;
 	public:
-		Transection()
+		Transaction()
 			: transection_id(0), member_id(0), book_id, borrow_date(""), 
 			due_date(""), return_date(""), status_of_book(""){}
-		Transection(int t_id, int m_id, int b_id, const string& b_date)
-			: transection_id(t_id), member_id(m_id), book_id(b_id), borrow_date(b_date)
+		Transaction(int t_id, int m_id, int b_id, const string& b_date)
+			: transaction_id(t_id), member_id(m_id), book_id(b_id), borrow_date(b_date)
 			, due_date(add_days_for_overdue(b_date, 14)), return_date(""), status_of_book("Borrowed") {}
 
 		int getBookId() const{
 			return book_id;
 		}
-		int getTransectionId()const{
-			return transection_id;
+		int getTransactionId()const{
+			return transaction_id;
 		}
 		int getMemberId()const{
 			return member_id;
@@ -486,7 +488,7 @@ public:
 			status_of_book = status;
 		}
 		void display() {
-			cout << "Transection Id: " << transection_id << endl;
+			cout << "Transaction Id: " << transaction_id << endl;
 			cout << "Member Id: " << member_id << endl;
 			cout << "Book Id: " << book_id << endl;
 			cout << "Date of borrow: " << borrow_date << endl;
@@ -497,7 +499,7 @@ public:
 		//file handling
 		void DataEntry(ofstream& out) const //constant bcz DO NOT want it to change anything.
 		{
-			out << Transection_id << "|" << member_id << "|" << book_id << "|" << borrow_date << "|"
+			out << Transaction_id << "|" << member_id << "|" << book_id << "|" << borrow_date << "|"
 				<< due_date << "|" << return_date << "|" << status_of_book << "|";
 		}
 		bool read(const string& line){
@@ -517,27 +519,94 @@ public:
 
 			if (index != 7) return false;
 
-			transection_id = stoi(data[0]); member_id = stoi(data[1]);
+			transaction_id = stoi(data[0]); member_id = stoi(data[1]);
 			book_id = stoi(data[2]); borrow_date = data[3];
 			due_date = data[4]; return_date = data[5]; 
 			status_of_book = data[6]; return true;
 		}
 	};
 
-	const int MAXTRANSECTIONS = 500;
-	class TransectionManager
+	const int MAXTRANSACTIONS = 500;
+	class TransactionManager
 	{
-		Transection transections[MAXTRANSECTIONS];
+		Transaction transactions[MAXTRANSACTIONS];
 		int count, next_id;	string file;
 	public:
-		TransectionManager(const string& filename = "transection.txt")
+		TransactionManager(const string& filename = "transaction.txt")
 			:count(0), file(filename), next_id(1) {
 			loadfiledata();
 			for (int i = 0; < count; i++)
 			{
-				if(transections[i].getTransectionId()>=next_id)
-					next_id=transections[i].getTransectionId
+				if (transactions[i].getTransactionId() >= next_id)
+					next_id = transactions[i].getTransactionId + 1;
 			}
+		}
+		void loadFileData()  //loading file data into transactions array
+		{
+			count = 0;
+			ifstream in;
+			in.open(file);
+			string line;
+			if (!in) return;
+			while (getline(in, line) && count < MAXBOOKS)
+			{
+				if (line.empty())
+					continue;   //to identify if string is empty
+				Transaction transaction_to_load;   //load details of transaction from file
+				if (transaction_to_load.read(line))
+					transactions[count++] = transaction_to_load;
+			}
+			in.close();
+		}
+		void saveFileData() const    //saving data to file
+		{
+			ofstream out;
+			out.open(file);
+			for (int i = 0; i < count; i++)
+			{
+				transactions[i].dataentry(out);
+			}
+			out.close();
+		}
+		bool isBookIssued(int b_id)const {
+			for (int i = 0; i < count; i++) {
+				if (transactions[i].getBookId() = b_id && transactions[i].getStatusOfBook() == "Borrowed")
+					return true;
+			}
+			return false;
+		}
+		int getTIndex(int t_id) const {
+			for (int i = 0; i < count; i++)
+			{
+				if (transactions[i].getTransactionId() == t_id)
+					return i;
+			}
+			return -1;
+		}
+		int getOverDueDays(int t_id) {
+			int index;
+			index = getTransactionindex(t_id); if (index == -1) return -1;
+			if (transactions[index].getStatusOfBook() != "returned") return 0;
+			return days_overdue(transactions[index].getDuedate(), transactions[index].getReturnDate());
+		}
+
+		int issueBook(int bookId, int memberId, const string& date_today, bookmanager& book_manager)
+		{
+			if (isBookIssued(bookId)) {
+				cout << "All copies of this book are Issued at the moment." << endl;
+					return -1;
+			}
+			int index = book_manager(getidindex(bookId));
+			if (index == -1) {
+				cout << "Book not found." << endl; return -1;
+			}
+			if (!book_manager(getBook(index)).issuebook()) {
+				cout << "No copies avaliable." << endl; return -1;
+			}
+			transactions[count++] = Transaction(nextId++,memberId, bookId, date_today);
+			saveFileData(); book_manager.savefiledata();
+			cout << "Book issued Successfully.\n Transaction Id: " << (next_id - 1) << endl;
+			return next_id - 1;
 		}
 
 	};

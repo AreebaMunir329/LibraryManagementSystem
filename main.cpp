@@ -1,6 +1,7 @@
 #include<iostream>
 #include"features/bookmanagement.cpp"
 #include "features/reviews&ratings.cpp"
+#include "features/Settings&leaderboard.cpp"
 
 int main()
 {

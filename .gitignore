@@ -34,15 +34,6 @@ CMakeCache.txt
 cmake_install.cmake
 
 # Data files your program generates at runtime
-users.txt
-books.txt
-members.txt
-fines.txt
-transactions.txt
-reservations.txt
-reviews.txt
-settings.txt
-categories.txt
 *.bak_*
 report*.txt
 

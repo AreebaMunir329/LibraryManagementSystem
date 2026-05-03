@@ -601,13 +601,115 @@ public:
 				cout << "Book not found." << endl; return -1;
 			}
 			if (!book_manager(getBook(index)).issuebook()) {
-				cout << "No copies avaliable." << endl; return -1;
+				cout << "No copies avalaible." << endl; return -1;
 			}
 			transactions[count++] = Transaction(nextId++,memberId, bookId, date_today);
 			saveFileData(); book_manager.savefiledata();
 			cout << "Book issued Successfully.\n Transaction Id: " << (next_id - 1) << endl;
 			return next_id - 1;
 		}
-
+		void returnBook(int t_id, const string& date_today, bookmanager& b_m)
+		{
+			int index, book_index;
+			index = getTransactionindex(t_id);
+			if (index == -1) {
+				cout << "Transaction not found." << endl; return;
+			}
+			if (transactions[index].getStatusOfBook() == "returned") {
+				cout << "This book has already been returned." << endl; return;
+			}
+			transactions[index].getReturnDate(date_today); transactions[index].setStatusOfBook("retuened");
+			book_index = b_m.getidindex(transactions[index].getBookId());
+			if (book_index != -1) {
+				b_m.getBook(book_index).returnbook();
+				saveFileData(); b_m.savefiledata();
+			}
+			int overdue_days;
+			overdue_days = days_overdue(transactions[index].getDueDate(), date_today);
+			if (overdue_days > 0) {
+				cout << "Book returned " << overdue_days << " days late." << endl;
+				cout << "Fine amount: Rs." << (overdue_days * 10) << endl;//will be further handled by finemanager.
+			}
+			else
+				cout << "Book returned on time.\n No fine charged." << endl;
+		}
+		//display functions
+		void viewAll()const {
+			if (count == 0) {
+				cout << "No transactions found." << endl; return;
+			}
+			cout << "ALL TRANSACTIONS>\n";
+			for (int i = 0; i < count; i++)
+				transactions[i].display();
+			cout << "Total no.of Transactions: " << count << endl;
+		}
+		void viewByMember(int m_id) const {
+			int m_found = 0;
+			for (int i = 0; i < count; i++) {
+				if (transactions[i].getMemberId == m_id)
+				{
+					transactions[i].display(); m_found++;
+				}
+				if (m_found == 0)
+					cout << "No transactions found for this member." << endl;
+			}
+		}
+		void viewByBook(int b_id)const {
+			int b_found = 0;
+			for (int i = 0; i < count; i++) {
+				if (transactions[i].getBookId == b_id)
+				{
+					transactions[i].display(); b_found++;
+				}
+				if (b_found == 0)
+					cout << "No transactions found for this Book." << endl;
+			}
+		}
+		void Menu(bool isAdmin, bookmanager& b_m) {
+			int choice;
+			do {
+				cout << "-----TRANSACTIONS-----\n";
+				cout << "1. Issue Book" << endl; cout << "2. Return Book." << endl;
+				cout << "3. View All Transactions." << endl; cout << "4. View My Transactions." << endl;
+				if (isAdmin) cout << "5. View Transactions by Book" << endl;
+				cout << "6. Back" << endl;
+				do {
+					cout << "Enter Choice:"; cin >> choice; cout << endl;
+				} while (choice < 1 || choice>6);
+				switch (choice)
+				{
+				case 1: {
+					int m_id, b_id; string date;
+					cout << "Enter Member Id: "; cin >> m_id; cout << endl;
+					cout << "Enter Book Id: "; cin >> b_id; cout << endl;
+					cout << "Enter Today's Date (DD/MM/YYYY): "; cin >> date; cout << endl;
+					issueBook(m_id, b_id, date, b_m); break;
+				}
+				case 2: {
+					int t_id; string date;
+					cout << "Enter Transaction Id: "; cin >> t_id; cout << endl;
+					cout << "Enter Today's Date (DD/MM/YYYY): "; cin >> date; cout << endl;
+					returnBook(t_id, date, b_m); break;
+				}
+				case 3: {
+					viewAll(); break;
+				}
+				case 4: {
+					viewByMember(m_id); break;
+				}
+				case 5: {
+					if (isAdmin)
+					{
+						int b_id; 
+						cout << "Enter Book ID: "; cin >> b_id; cout << endl;
+						viewByBook(b_id); break;
+					}
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
 	};
 

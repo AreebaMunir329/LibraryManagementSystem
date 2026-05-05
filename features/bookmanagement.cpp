@@ -1,6 +1,7 @@
 #include<iostream>
 #include<fstream>
 #include<string>
+#include<Fine.h>
 using namespace std;
 
 const int MAXBOOKS = 200;   //maximum capacity of library
@@ -538,7 +539,7 @@ public:
 			for (int i = 0; < count; i++)
 			{
 				if (transactions[i].getTransactionId() >= next_id)
-					next_id = transactions[i].getTransactionId + 1;
+					next_id = transactions[i].getTransactionId() + 1;
 			}
 		}
 		void loadFileData()  //loading file data into transactions array
@@ -608,7 +609,7 @@ public:
 			cout << "Book issued Successfully.\n Transaction Id: " << (next_id - 1) << endl;
 			return next_id - 1;
 		}
-		void returnBook(int t_id, const string& date_today, bookmanager& b_m)
+		void returnBook(int t_id, const string& date_today, bookmanager& b_m, FineManager& f_m)
 		{
 			int index, book_index;
 			index = getTransactionindex(t_id);
@@ -618,7 +619,7 @@ public:
 			if (transactions[index].getStatusOfBook() == "returned") {
 				cout << "This book has already been returned." << endl; return;
 			}
-			transactions[index].getReturnDate(date_today); transactions[index].setStatusOfBook("retuened");
+			transactions[index].getReturnDate(date_today); transactions[index].setStatusOfBook("returned");
 			book_index = b_m.getidindex(transactions[index].getBookId());
 			if (book_index != -1) {
 				b_m.getBook(book_index).returnbook();
@@ -628,7 +629,7 @@ public:
 			overdue_days = days_overdue(transactions[index].getDueDate(), date_today);
 			if (overdue_days > 0) {
 				cout << "Book returned " << overdue_days << " days late." << endl;
-				cout << "Fine amount: Rs." << (overdue_days * 10) << endl;//will be further handled by finemanager.
+				f_m.createFine(t_id, transactions[index].getMemberId, overdue_days);
 			}
 			else
 				cout << "Book returned on time.\n No fine charged." << endl;
@@ -646,7 +647,7 @@ public:
 		void viewByMember(int m_id) const {
 			int m_found = 0;
 			for (int i = 0; i < count; i++) {
-				if (transactions[i].getMemberId == m_id)
+				if (transactions[i].getMemberId() == m_id)
 				{
 					transactions[i].display(); m_found++;
 				}
@@ -695,6 +696,8 @@ public:
 					viewAll(); break;
 				}
 				case 4: {
+					int m_id;
+					cout << "Enter Member Id: "; cin >> m_id; cout << endl;
 					viewByMember(m_id); break;
 				}
 				case 5: {

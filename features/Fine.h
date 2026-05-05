@@ -21,7 +21,7 @@ public:
 	float getFineAmount() const;
 	string getFineStatue()const;
 
-	setFineStatus(const string& status);
+	void setFineStatus(const string& new_status);
 
 	void display()const;
 	void DataEntry(ofstream& out)const;
@@ -41,7 +41,7 @@ public:
 
 	void viewAll()const; void viewByMember(int m_id) const;
 	void viewUnpaid()const;
-
+	//helper
 	int getFineIndex(int f_id) const;
 	bool FinesPending(int m_id) const;
 

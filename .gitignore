@@ -34,6 +34,7 @@ CMakeCache.txt
 cmake_install.cmake
 
 # Data files your program generates at runtime
+<<<<<<< HEAD
 users.txt
 fines.txt
 transactions.txt
@@ -41,6 +42,8 @@ reservations.txt
 reviews.txt
 settings.txt
 categories.txt
+=======
+>>>>>>> 35dd95190cb727c264d6adb55995500e0954a52d
 *.bak_*
 report*.txt
 

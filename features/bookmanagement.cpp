@@ -1,727 +1,918 @@
-#ifndef BOOK_MANAGEMENT_CPP 
-#define BOOK_MANAGEMENT_CPP 
+#ifndef FILE_HANDLER_AND_LIBRARY_CPP
+#define FILE_HANDLER_AND_LIBRARY_CPP
 
-#include<fstream>
-#include<string>
-#include<Fine.h>
+#include <fstream>
+#include <string>
 using namespace std;
 
-const int MAXBOOKS = 200;   //maximum capacity of library
+#include "User_Management.cpp"
+#include "bookmanagement.cpp"
+#include "feature 3 member mangement borrowed book.cpp"
+#include "reviews&ratings.cpp"
+#include "feature 7 book reservation system.cpp.txt"
+#include "Settings&leaderboard.cpp"
+#include "BookCategoriesAndGenereBasedBrowsing.cpp"
+#include "reports.cpp"
 
-//deals with data of one book
-class book {
-	int id;
-	string name;
-	string author;
-	string isbn;
-	string category;
-	int totalcpy;
-	int availablecpy;
-	int timesIssued;
-public:
-	//ctr
-	book() : id(0), name(""), author(""), isbn(""), category(""), totalcpy(0), availablecpy(0), timesIssued(0) {}
-	book(int id, string n, string a, string i, string cat, int cpy, int t_issued) : id(id), name(n), author(a), isbn(i), category(cat), totalcpy(cpy), availablecpy(cpy), timesIssued(t_issued) {}
+const int MAX_BOOKS = 200;
+const int MAX_MEMBERS = 100;
+const int MAX_RECORDS = 500;
+const int MAX_REVIEWS = 200;
+const int MAX_RESERVATIONS = 200;
 
-	// getters
-	int getid() const
-	{
-		return id;
-	}
-	string getname() const
-	{
-		return name;
-	}
-	string getauthor() const
-	{
-		return author;
-	}
-	string getisbn() const
-	{
-		return isbn;
-	}
-	string getcategory() const
-	{
-		return category;
-	}
-	int gettotalcpy() const
-	{
-		return totalcpy;
-	}
-	int getavailablecpy() const
-	{
-		return availablecpy;
-	}
-	void gettimesissued() const
-	{
-		return timesIssued;
-	}
-	//setters
-	void setavailablecpy(int cpy)
-	{
-		availablecpy = cpy;
-	}
-	void settotalcpy(int cpy)
-	{
-		totalcpy = cpy;
-	}
-
-
-	//display
-	void display() const
-	{
-		cout << "ID: " << id << endl;
-		cout << "Title: " << name << endl;
-		cout << "Author: " << author << endl;
-		cout << "ISBN: " << isbn << endl;
-		cout << "Category: " << category << endl;
-		cout << "Available copies: " << availablecpy << "/" << totalcpy << endl;
-		cout << "------------------------------------------------------------" << endl;
-	}
-
-	//functionality
-	void returnbook()  // called when a book is returned
-	{
-		if (totalcpy > availablecpy)
-		{
-			availablecpy++;  //increase available by one
-		}
-	}
-
-	bool issuebook()  //called when a book is issued
-	{
-		if (availablecpy <= 0) //when no copies are available
-		{
-			return false;
-		}
-		availablecpy--;
-		timesIssued++;
-		return true;
-	}
-
-	//file handling
-	void dataentry(ofstream& out) const
-	{
-		out << id << "|" << name << "|" << author << "|" << isbn << "|" << category << "|" << totalcpy << "|" << availablecpy << endl;
-	}
-	bool read(const string& line)  //receives a line from file 
-	{
-		string data[7];  //7 vars
-		int index = 0;
-		string input = "";
-		for (int i = 0; i < (int)line.size(); i++)
-		{
-			if (line[i] == '|') //separator found (value of one variable is stored)
-			{
-				if (index >= 7) return false;   //edge-case handling
-				data[index++] = input;  //assigns stored value
-				input = "";
-			}
-			else  //keeps adding char until hits a '|' 
-			{
-				input += line[i];
-			}
-		}
-		data[index++] = input;  //assigns val of last var
-
-		if (index != 7) return false;  //indicates smth is wrong
-
-		//manually assigning val to vars
-		id = stoi(data[0]);  //used inbuilt function because the code is already lengthy
-		name = data[1];
-		author = data[2];
-		isbn = data[3];
-		category = data[4];
-		totalcpy = stoi(data[5]);
-		availablecpy = stoi(data[6]);
-		return true;
-	}
-};
-
-void loadfiledata()  //loading file data into books arr
+string lowerText(string s)
 {
-	count = 0;
-	ifstream in;
-	in.open(file);
-	string line;
-	if (!in) return;
-	while (getline(in, line) && count < MAXBOOKS)
-	{
-		if (line.empty()) continue;   //to identify if string is empty
-		book booktoload;   //load details of book from file
-		if (booktoload.read(line))
-			books[count++] = booktoload;
-	}
-	in.close();
+    for (int i = 0; i < (int)s.length(); i++)
+        if (s[i] >= 'A' && s[i] <= 'Z')
+            s[i] = s[i] + 32;
+    return s;
 }
-//manages all books
-class bookmanager
+
+int toInt(string s)
 {
-	book books[MAXBOOKS];
-	int count;
-	string file;
-	int nextid;
+    int n = 0;
+    for (int i = 0; i < (int)s.length(); i++)
+        if (s[i] >= '0' && s[i] <= '9')
+            n = n * 10 + (s[i] - '0');
+    return n;
+}
+
+double toDouble(string s)
+{
+    double n = 0;
+    double div = 10;
+    bool afterDot = false;
+
+    for (int i = 0; i < (int)s.length(); i++)
+    {
+        if (s[i] == '.')
+            afterDot = true;
+        else if (s[i] >= '0' && s[i] <= '9')
+        {
+            if (!afterDot)
+                n = n * 10 + (s[i] - '0');
+            else
+            {
+                n = n + (s[i] - '0') / div;
+                div = div * 10;
+            }
+        }
+    }
+    return n;
+}
+
+int dateToDays(string date)
+{
+    if ((int)date.length() < 10)
+        return 0;
+
+    int y = toInt(date.substr(0, 4));
+    int m = toInt(date.substr(5, 2));
+    int d = toInt(date.substr(8, 2));
+    return y * 365 + m * 30 + d;
+}
+
+string addDays(string date, int days)
+{
+    if ((int)date.length() < 10)
+        return date;
+
+    int y = toInt(date.substr(0, 4));
+    int m = toInt(date.substr(5, 2));
+    int d = toInt(date.substr(8, 2));
+    d = d + days;
+
+    while (d > 30)
+    {
+        d = d - 30;
+        m++;
+    }
+    while (m > 12)
+    {
+        m = m - 12;
+        y++;
+    }
+
+    string mm = "";
+    string dd = "";
+    if (m < 10)
+        mm = "0";
+    if (d < 10)
+        dd = "0";
+
+    return to_string(y) + "-" + mm + to_string(m) + "-" + dd + to_string(d);
+}
+
+class BorrowInfo
+{
+    Member* member;
+    Book* book;
+    BorrowRecord* record;
+
 public:
-	//ctr
-	bookmanager(const string& filename = "books.txt") : count(0), file(filename), nextid(1)
-	{
-		loadfiledata();
-	}
+    BorrowInfo()
+    {
+        member = NULL;
+        book = NULL;
+        record = NULL;
+    }
 
-	//file handling
-	
-	void savefiledata() const    //saving data to file
-	{
-		ofstream out;
-		out.open(file);
-		for (int i = 0; i < count; i++)
-		{
-			books[i].dataentry(out);
-		}
-		out.close();
-	}
+    void set(Member* m, Book* b, BorrowRecord* r)
+    {
+        member = m;
+        book = b;
+        record = r;
+    }
 
-	//functionality
-	//add book
-	void addbook()
-	{
-		string name, author, isbn, category;
-		int cpy;
-		if (count >= MAXBOOKS)  //edge case handling
-		{
-			cout << "Library is full" << endl;
-			return;
-		}
-		cout << "ADD NEW BOOK" << endl;
-		cin.ignore();
+    string getLine()
+    {
+        if (member == NULL || book == NULL || record == NULL)
+            return "";
 
-		cout << "Title: ";
-		getline(cin, name);
-		for (int i = 0; i < count; i++)
-		{
-			if (lowercase(books[i].getname()) == lowercase(name))
-			{
-				cout << "A book with this title already exists" << endl;
-				return;
-			}
-		}
-
-		cout << "Author: ";
-		getline(cin, author);
-
-		bool exists;
-		do
-		{
-			exists = false;
-			cout << "ISBN: ";
-			getline(cin, isbn);
-			for (int i = 0; i < count; i++)
-			{
-				if (books[i].getisbn() == isbn)
-				{
-					exists = true;
-					break;
-				}
-			}
-		} while (exists);  //input validation
-
-		cout << "Cateory: ";
-		getline(cin, category);
-
-		do
-		{
-			cout << "Copies: ";
-			cin >> cpy;
-		} while (cpy <= 0);  //input validation
-		books[count++] = book(nextid++, name, author, isbn, category, cpy);
-		savefiledata();
-		cout << "NEw book added with ID: " << (nextid - 1) << endl;
-	}
-	book& getBook(int index)//added by 0521.
-	{
-		return books[index];
-	}
-	//remove book 
-	void removebook()
-	{
-		int id;
-		cout << "REMOVE BOOK" << endl;
-		cout << "Enter book id to remove: ";
-		cin >> id;
-
-		int index = getidindex(id);
-		if (index == -1)
-		{
-			cout << "No book with id " << id << " found" << endl;
-			return;
-		}
-
-		//moves beyond this point if index is valid
-		int issuedbooks = books[index].gettotalcpy() - books[index].getavailablecpy();
-		if (issuedbooks > 0)  //edge case handling
-		{
-			cout << "Book cannot be removed, copies still issued to members" << endl;
-			return;
-		}
-
-		//moves beyond this point if no copy is issued
-		char confirm;
-		cout << "Removing: " << books[index].getname() << " by " << books[index].getauthor() << endl;
-		do
-		{
-			cout << "Are you sure (Y/N): ";  //input validation     STILL NEEDS CHECK FOR STRING INPUT
-			cin >> confirm;
-		} while (confirm != 'y' && confirm != 'Y' && confirm != 'n' && confirm != 'N');
-
-		if (confirm == 'y' || confirm == 'Y')
-		{
-			for (int i = 0; i < count; i++)  //shifts to left i.e. removes the book
-			{
-				books[i] = books[i + 1];
-			}
-			count--;
-			savefiledata();
-			cout << "Book removed successfully!" << endl;
-		}
-		else
-		{
-			cout << "Removal request cancelled" << endl;
-		}
-	}
-
-	//search book
-	void searchbook() const
-	{
-		int choice;
-		do
-		{
-			cout << "Search by: " << endl;
-			cout << "1.Title: " << endl;
-			cout << "2.Author: " << endl;
-			cout << "3.ISBN: " << endl;
-			cin >> choice;
-		} while (choice != 2 && choice != 1 && choice != 3);
-		cin.ignore();
-
-		string keyword;
-		cout << "Enter keyword to find: ";
-		getline(cin, keyword);
-		string lwrkeyword = lowercase(keyword);//convert to lowercase for comparison
-
-		int booksfound = 0; //number of books found
-		for (int i = 0; i < count; i++)
-		{
-			bool match = false;
-			if (choice == 1 && lowercase(books[i].getname()).find(lwrkeyword) != string::npos)
-			{
-				match = true;
-			}
-			else if (choice == 2 && lowercase(books[i].getauthor()).find(lwrkeyword) != string::npos)
-			{
-				match = true;
-			}
-			else if (choice == 3 && books[i].getisbn() == keyword)
-			{
-				match = true;
-			}
-
-			if (match)
-			{
-				books[i].display();
-				booksfound++;
-			}
-		}
-		if (booksfound == 0)
-		{
-			cout << "No books matched your search" << endl;
-		}
-		else
-		{
-			cout << booksfound << " book(s) found" << endl;
-		}
-	}
-
-	//display all books
-	void displayall() const
-	{
-		if (count == 0)
-		{
-			cout << "No books in library" << endl;
-			return;
-		}
-
-		cout << "ALL BOOKS:" << endl;
-		for (int i = 0; i < count; i++)
-		{
-			books[i].display();
-		}
-		cout << "Total books: " << count << endl;
-	}
-
-	//helper functions
-	int getidindex(int id) const
-	{
-		for (int i = 0; i < count; i++)
-		{
-			if (books[i].getid() == id)
-			{
-				return i;
-			}
-		}
-		return -1;   //index not found
-	}
-
-	string lowercase(const string& word) const
-	{
-		string res = word;
-		for (int i = 0; i < (int)res.size(); i++)
-		{
-			res[i] = tolower(res[i]);  //convert to lowercase char by char
-		}
-		return res;
-	}
-	void menu(bool isadmin)  //implementation after authentication
-	{
-		do
-		{
-			int choice;
-			cout << "-------------BOOKS MANAGEMENT-----------------" << endl;
-			if (isadmin)  //only admin can access these
-			{
-				cout << "1. Add Book" << endl;
-				cout << "2. Remove Book" << endl;
-			}
-			cout << "3.Search Book" << endl;
-			cout << "4.View All Books" << endl;
-			cout << "5.Back" << endl;
-			do
-			{
-				cout << "Enter number of your desired function: ";
-				cin >> choice;
-			} while (choice < 1 || choice > 5);  //input validation
-			if (choice == 1 && isadmin)
-				addbook();
-			else if (choice == 2 && isadmin)
-				removebook();
-			else if (choice == 3)
-				searchbook();
-			else if (choice == 4)
-				displayall();
-			else if (choice == 5)  //exits the loop
-				break;
-			else
-				cout << "Invalid option" << endl;
-		} while (true);
-	}
+        string line = book->getTitle() + " | ISBN: " + book->getIsbn();
+        line += " | Issue: " + record->issueDate;
+        line += " | Due: " + record->dueDate;
+        if (record->returned == 1)
+            line += " | Returned: " + record->returnDate;
+        else
+            line += " | Currently issued";
+        return line;
+    }
 };
 
-	//helper functions
-	int date_to_days(const string& date)
-	{
-		int day, month, year;
-		day = stoi(date.substr(0, 2)); 
-		month = stoi(date.substr(3, 2));
-		year = stoi(date.substr(6, 4));
-		return (year * 365 + month * 30 + day);//return days
-	}
-	string add_days_for_overdue(const string& date, int days)
-	{
-		int day, month, year;
-		day = stoi(date.substr(0, 2));
-		month = stoi(date.substr(3, 2));
-		year = stoi(date.substr(6, 4));
-		days += 14;//14 days above due date are allowed to return without fine
+class Library
+{
+    Book books[MAX_BOOKS];
+    Member members[MAX_MEMBERS];
+    BorrowRecord records[MAX_RECORDS];
+    Review reviews[MAX_REVIEWS];
+    Reservation reservations[MAX_RESERVATIONS];
 
-		int days_in_months[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
-		while (days > days_in_months[month])
-		{
-			days -= days_in_months[month]; m++;
-			if (m > 12)
-			{
-				m = 1; year++; //new year so update month and year
-			}
-		}
-		string dd, mm, yy;
-		dd = (days < 10 ? "0" : "") + to_string(days);
-		dd = (month < 10 ? "0" : "") + to_string(month);
-		yy = to_string(year);//back to dd/mm/yy
-		return days + "/" + month + "/" + year;
-	}
-	int days_overdue(const string& due_date, const string& date_of_return)
-	{
-		int difference;
-		difference = date_to_days(date_of_return) - date_to_days(due_date);
-		if (difference > 0)
-			return difference;//returned after due date
-		else
-			return 0;//returned on/before due date
-	}
+    int bookCount;
+    int memberCount;
+    int recordCount;
+    int reviewCount;
+    int reservationCount;
+    int nextBookId;
+    int nextRecordId;
 
-	class Transaction
-	{
-		int transaction_id, member_id, book_id;
-		string borrow_date, due_date, return_date, status_of_book;
-	public:
-		Transaction()
-			: transection_id(0), member_id(0), book_id, borrow_date(""), 
-			due_date(""), return_date(""), status_of_book(""){}
-		Transaction(int t_id, int m_id, int b_id, const string& b_date)
-			: transaction_id(t_id), member_id(m_id), book_id(b_id), borrow_date(b_date)
-			, due_date(add_days_for_overdue(b_date, 14)), return_date(""), status_of_book("Borrowed") {}
+public:
+    Settings settings;
 
-		int getBookId() const{
-			return book_id;
-		}
-		int getTransactionId()const{
-			return transaction_id;
-		}
-		int getMemberId()const{
-			return member_id;
-		}
-		string getBorrowDate()const{
-			return borrow_date;
-		}
-		string getDueDate()const{
-			return due_date;
-		}
-		string getReturnDate()const{
-			return return_date;
-		}
-		string getStatusOfBook()const{
-			return status_of_book;
-		}
-		void setDueDate(const string& date) {
-			return_date = date;
-		}
-		void setStatusOfBook(const string& status) {
-			status_of_book = status;
-		}
-		void display() {
-			cout << "Transaction Id: " << transaction_id << endl;
-			cout << "Member Id: " << member_id << endl;
-			cout << "Book Id: " << book_id << endl;
-			cout << "Date of borrow: " << borrow_date << endl;
-			cout << "Due Date: " << due_date << endl;
-			cout << "Date of return: " << return_date << endl;
-			cout << "Status of book:" << status_of_book << endl;
-		}
-		//file handling
-		void DataEntry(ofstream& out) const //constant bcz DO NOT want it to change anything.
-		{
-			out << Transaction_id << "|" << member_id << "|" << book_id << "|" << borrow_date << "|"
-				<< due_date << "|" << return_date << "|" << status_of_book << "|";
-		}
-		bool read(const string& line){
-			int index = 0; string data[7], input = "";
-			for (int i = 0; i < (int)line.size; i++)
-			{
-				if (line[i] == '|')
-				{
-					if (index >= 7)
-						return false;//edge case
-					data[index++] = input; input = "";
-				}
-				else
-					input += line[i];
-			}
-			data[index++] = input;
+    Library()
+    {
+        bookCount = 0;
+        memberCount = 0;
+        recordCount = 0;
+        reviewCount = 0;
+        reservationCount = 0;
+        nextBookId = 1;
+        nextRecordId = 1;
+        loadAll();
+    }
 
-			if (index != 7) return false;
+    void split(string line, string parts[], int& count)
+    {
+        count = 0;
+        string temp = "";
+        for (int i = 0; i <= (int)line.length(); i++)
+        {
+            if (i == (int)line.length() || line[i] == '|')
+            {
+                parts[count] = temp;
+                count++;
+                temp = "";
+            }
+            else
+                temp = temp + line[i];
+        }
+    }
 
-			transaction_id = stoi(data[0]); member_id = stoi(data[1]);
-			book_id = stoi(data[2]); borrow_date = data[3];
-			due_date = data[4]; return_date = data[5]; 
-			status_of_book = data[6]; return true;
-		}
-	};
+    void loadAll()
+    {
+        settings.load();
+        loadBooks();
+        loadMembers();
+        loadRecords();
+        loadReviews();
+        loadReservations();
+    }
 
-	const int MAXTRANSACTIONS = 500;
-	class TransactionManager
-	{
-		Transaction transactions[MAXTRANSACTIONS];
-		int count, next_id;	string file;
-	public:
-		TransactionManager(const string& filename = "transaction.txt")
-			:count(0), file(filename), next_id(1) {
-			loadfiledata();
-			for (int i = 0; < count; i++)
-			{
-				if (transactions[i].getTransactionId() >= next_id)
-					next_id = transactions[i].getTransactionId() + 1;
-			}
-		}
-		void loadFileData()  //loading file data into transactions array
-		{
-			count = 0;
-			ifstream in;
-			in.open(file);
-			string line;
-			if (!in) return;
-			while (getline(in, line) && count < MAXBOOKS)
-			{
-				if (line.empty())
-					continue;   //to identify if string is empty
-				Transaction transaction_to_load;   //load details of transaction from file
-				if (transaction_to_load.read(line))
-					transactions[count++] = transaction_to_load;
-			}
-			in.close();
-		}
-		void saveFileData() const    //saving data to file
-		{
-			ofstream out;
-			out.open(file);
-			for (int i = 0; i < count; i++)
-			{
-				transactions[i].dataentry(out);
-			}
-			out.close();
-		}
-		bool isBookIssued(int b_id)const {
-			for (int i = 0; i < count; i++) {
-				if (transactions[i].getBookId() = b_id && transactions[i].getStatusOfBook() == "Borrowed")
-					return true;
-			}
-			return false;
-		}
-		int getTIndex(int t_id) const {
-			for (int i = 0; i < count; i++)
-			{
-				if (transactions[i].getTransactionId() == t_id)
-					return i;
-			}
-			return -1;
-		}
-		int getOverDueDays(int t_id) {
-			int index;
-			index = getTransactionindex(t_id); if (index == -1) return -1;
-			if (transactions[index].getStatusOfBook() != "returned") return 0;
-			return days_overdue(transactions[index].getDuedate(), transactions[index].getReturnDate());
-		}
+    void saveAll()
+    {
+        saveBooks();
+        saveMembers();
+        saveRecords();
+        saveReviews();
+        saveReservations();
+        settings.save();
+    }
 
-		int issueBook(int bookId, int memberId, const string& date_today, bookmanager& book_manager)
-		{
-			if (isBookIssued(bookId)) {
-				cout << "All copies of this book are Issued at the moment." << endl;
-					return -1;
-			}
-			int index = book_manager(getidindex(bookId));
-			if (index == -1) {
-				cout << "Book not found." << endl; return -1;
-			}
-			if (!book_manager(getBook(index)).issuebook()) {
-				cout << "No copies avalaible." << endl; return -1;
-			}
-			transactions[count++] = Transaction(nextId++,memberId, bookId, date_today);
-			saveFileData(); book_manager.savefiledata();
-			cout << "Book issued Successfully.\n Transaction Id: " << (next_id - 1) << endl;
-			return next_id - 1;
-		}
-		void returnBook(int t_id, const string& date_today, bookmanager& b_m, FineManager& f_m)
-		{
-			int index, book_index;
-			index = getTransactionindex(t_id);
-			if (index == -1) {
-				cout << "Transaction not found." << endl; return;
-			}
-			if (transactions[index].getStatusOfBook() == "returned") {
-				cout << "This book has already been returned." << endl; return;
-			}
-			transactions[index].getReturnDate(date_today); transactions[index].setStatusOfBook("returned");
-			book_index = b_m.getidindex(transactions[index].getBookId());
-			if (book_index != -1) {
-				b_m.getBook(book_index).returnbook();
-				saveFileData(); b_m.savefiledata();
-			}
-			int overdue_days;
-			overdue_days = days_overdue(transactions[index].getDueDate(), date_today);
-			if (overdue_days > 0) {
-				cout << "Book returned " << overdue_days << " days late." << endl;
-				f_m.createFine(t_id, transactions[index].getMemberId, overdue_days);
-			}
-			else
-				cout << "Book returned on time.\n No fine charged." << endl;
-		}
-		//display functions
-		void viewAll()const {
-			if (count == 0) {
-				cout << "No transactions found." << endl; return;
-			}
-			cout << "ALL TRANSACTIONS>\n";
-			for (int i = 0; i < count; i++)
-				transactions[i].display();
-			cout << "Total no.of Transactions: " << count << endl;
-		}
-		void viewByMember(int m_id) const {
-			int m_found = 0;
-			for (int i = 0; i < count; i++) {
-				if (transactions[i].getMemberId() == m_id)
-				{
-					transactions[i].display(); m_found++;
-				}
-				if (m_found == 0)
-					cout << "No transactions found for this member." << endl;
-			}
-		}
-		void viewByBook(int b_id)const {
-			int b_found = 0;
-			for (int i = 0; i < count; i++) {
-				if (transactions[i].getBookId == b_id)
-				{
-					transactions[i].display(); b_found++;
-				}
-				if (b_found == 0)
-					cout << "No transactions found for this Book." << endl;
-			}
-		}
-		void Menu(bool isAdmin, bookmanager& b_m) {
-			int choice;
-			do {
-				cout << "-----TRANSACTIONS-----\n";
-				cout << "1. Issue Book" << endl; cout << "2. Return Book." << endl;
-				cout << "3. View All Transactions." << endl; cout << "4. View My Transactions." << endl;
-				if (isAdmin) cout << "5. View Transactions by Book" << endl;
-				cout << "6. Back" << endl;
-				do {
-					cout << "Enter Choice:"; cin >> choice; cout << endl;
-				} while (choice < 1 || choice>6);
-				switch (choice)
-				{
-				case 1: {
-					int m_id, b_id; string date;
-					cout << "Enter Member Id: "; cin >> m_id; cout << endl;
-					cout << "Enter Book Id: "; cin >> b_id; cout << endl;
-					cout << "Enter Today's Date (DD/MM/YYYY): "; cin >> date; cout << endl;
-					issueBook(m_id, b_id, date, b_m); break;
-				}
-				case 2: {
-					int t_id; string date;
-					cout << "Enter Transaction Id: "; cin >> t_id; cout << endl;
-					cout << "Enter Today's Date (DD/MM/YYYY): "; cin >> date; cout << endl;
-					returnBook(t_id, date, b_m); break;
-				}
-				case 3: {
-					viewAll(); break;
-				}
-				case 4: {
-					int m_id;
-					cout << "Enter Member Id: "; cin >> m_id; cout << endl;
-					viewByMember(m_id); break;
-				}
-				case 5: {
-					if (isAdmin)
-					{
-						int b_id; 
-						cout << "Enter Book ID: "; cin >> b_id; cout << endl;
-						viewByBook(b_id); break;
-					}
-					break;
-				}
-				default:
-					break;
-				}
-			}
-		}
-	};
+    void loadBooks()
+    {
+        bookCount = 0;
+        ifstream in("books.txt");
+        string line, p[10];
+        int pc;
+
+        while (getline(in, line) && bookCount < MAX_BOOKS)
+        {
+            split(line, p, pc);
+            if (pc >= 8)
+            {
+                int id = toInt(p[0]);
+                books[bookCount].setData(id, p[1], p[2], p[3], p[4],
+                    toInt(p[5]), toInt(p[6]), toInt(p[7]));
+                if (id >= nextBookId)
+                    nextBookId = id + 1;
+                bookCount++;
+            }
+        }
+        in.close();
+    }
+
+    void saveBooks()
+    {
+        ofstream out("books.txt");
+        for (int i = 0; i < bookCount; i++)
+            books[i].save(out);
+        out.close();
+    }
+
+    void loadMembers()
+    {
+        memberCount = 0;
+        ifstream in("members.txt");
+        string line, p[10];
+        int pc;
+
+        while (getline(in, line) && memberCount < MAX_MEMBERS)
+        {
+            split(line, p, pc);
+            if (pc >= 7)
+            {
+                members[memberCount].setData(p[0], p[1], p[2], p[3], p[4],
+                    toDouble(p[5]), toInt(p[6]));
+                memberCount++;
+            }
+        }
+        in.close();
+    }
+
+    void saveMembers()
+    {
+        ofstream out("members.txt");
+        for (int i = 0; i < memberCount; i++)
+            members[i].save(out);
+        out.close();
+    }
+
+    void loadRecords()
+    {
+        recordCount = 0;
+        ifstream in("records.txt");
+        string line, p[10];
+        int pc;
+
+        while (getline(in, line) && recordCount < MAX_RECORDS)
+        {
+            split(line, p, pc);
+            if (pc >= 7)
+            {
+                records[recordCount].id = toInt(p[0]);
+                records[recordCount].username = p[1];
+                records[recordCount].isbn = p[2];
+                records[recordCount].issueDate = p[3];
+                records[recordCount].dueDate = p[4];
+                records[recordCount].returnDate = p[5];
+                records[recordCount].returned = toInt(p[6]);
+                if (records[recordCount].id >= nextRecordId)
+                    nextRecordId = records[recordCount].id + 1;
+                recordCount++;
+            }
+        }
+        in.close();
+    }
+
+    void saveRecords()
+    {
+        ofstream out("records.txt");
+        for (int i = 0; i < recordCount; i++)
+            records[i].save(out);
+        out.close();
+    }
+
+    void loadReviews()
+    {
+        reviewCount = 0;
+        ifstream in("reviews.txt");
+        string line, p[10];
+        int pc;
+
+        while (getline(in, line) && reviewCount < MAX_REVIEWS)
+        {
+            split(line, p, pc);
+            if (pc >= 4)
+            {
+                reviews[reviewCount].username = p[0];
+                reviews[reviewCount].isbn = p[1];
+                reviews[reviewCount].rating = toInt(p[2]);
+                reviews[reviewCount].comment = p[3];
+                reviewCount++;
+            }
+        }
+        in.close();
+    }
+
+    void saveReviews()
+    {
+        ofstream out("reviews.txt");
+        for (int i = 0; i < reviewCount; i++)
+            reviews[i].save(out);
+        out.close();
+    }
+
+    void loadReservations()
+    {
+        reservationCount = 0;
+        ifstream in("reservations.txt");
+        string line, p[10];
+        int pc;
+
+        while (getline(in, line) && reservationCount < MAX_RESERVATIONS)
+        {
+            split(line, p, pc);
+            if (pc >= 4)
+            {
+                reservations[reservationCount].username = p[0];
+                reservations[reservationCount].isbn = p[1];
+                reservations[reservationCount].date = p[2];
+                reservations[reservationCount].active = toInt(p[3]);
+                reservationCount++;
+            }
+        }
+        in.close();
+    }
+
+    void saveReservations()
+    {
+        ofstream out("reservations.txt");
+        for (int i = 0; i < reservationCount; i++)
+            reservations[i].save(out);
+        out.close();
+    }
+
+    int findBookByIsbn(string isbn)
+    {
+        for (int i = 0; i < bookCount; i++)
+            if (books[i].getIsbn() == isbn)
+                return i;
+        return -1;
+    }
+
+    int findMember(string username)
+    {
+        for (int i = 0; i < memberCount; i++)
+            if (members[i].getUsername() == username)
+                return i;
+        return -1;
+    }
+
+    string getPersonRole(Person* person)
+    {
+        if (person == NULL)
+            return "Unknown";
+        return person->getRole();
+    }
+
+    bool isValidEmail(string email)
+    {
+        int atPos = -1;
+        int dotPos = -1;
+
+        for (int i = 0; i < (int)email.length(); i++)
+            if (email[i] == '@')
+                atPos = i;
+
+        if (atPos <= 0)
+            return false;
+
+        for (int i = atPos + 1; i < (int)email.length(); i++)
+            if (email[i] == '.')
+                dotPos = i;
+
+        // dot must come after @, and there must be characters after the dot
+        if (dotPos <= atPos + 1)
+            return false;
+        if (dotPos >= (int)email.length() - 1)
+            return false;
+
+        return true;
+    }
+
+    bool signup(string u, string p, string name, string email, string phone)
+    {
+        if (u == "" || p == "" || memberCount >= MAX_MEMBERS)
+            return false;
+        if (findMember(u) != -1)
+            return false;
+        if (!isValidEmail(email))
+            return false;
+
+        members[memberCount].setData(u, p, name, email, phone, 0, 0);
+        memberCount++;
+        saveMembers();
+        return true;
+    }
+
+    bool memberLogin(string u, string p)
+    {
+        int index = findMember(u);
+        if (index == -1)
+            return false;
+        return members[index].getPassword() == p;
+    }
+
+    string forgotPassword(string username, string email, string newPassword)
+    {
+        int index = findMember(username);
+        if (index == -1)
+            return "Member not found.";
+        if (members[index].getEmail() != email)
+            return "Email does not match.";
+        if (newPassword == "")
+            return "New password cannot be empty.";
+
+        members[index].setData(members[index].getUsername(), newPassword,
+            members[index].getFullName(), members[index].getEmail(),
+            members[index].getPhone(), members[index].getFine(),
+            members[index].getTotalIssued());
+        saveMembers();
+        return "Password reset successfully.";
+    }
+
+    string changePassword(string username, string oldPassword, string newPassword)
+    {
+        int index = findMember(username);
+        if (index == -1)
+            return "Member not found.";
+        if (members[index].getPassword() != oldPassword)
+            return "Old password is wrong.";
+        if (newPassword == "")
+            return "New password cannot be empty.";
+
+        members[index].setData(members[index].getUsername(), newPassword,
+            members[index].getFullName(), members[index].getEmail(),
+            members[index].getPhone(), members[index].getFine(),
+            members[index].getTotalIssued());
+        saveMembers();
+        return "Password changed successfully.";
+    }
+
+    string updateMemberDetails(string username, string fullName, string email, string phone)
+    {
+        int index = findMember(username);
+        if (index == -1)
+            return "Member not found.";
+
+        if (fullName == "")
+            fullName = members[index].getFullName();
+        if (email == "")
+            email = members[index].getEmail();
+        if (phone == "")
+            phone = members[index].getPhone();
+
+        members[index].setData(members[index].getUsername(), members[index].getPassword(),
+            fullName, email, phone, members[index].getFine(),
+            members[index].getTotalIssued());
+        saveMembers();
+        return "Member details updated.";
+    }
+
+    string addBook(string title, string author, string isbn, string cat, int copies)
+    {
+        if (title == "" || isbn == "" || copies <= 0)
+            return "Please enter title, ISBN and copies.";
+
+        int existing = findBookByIsbn(isbn);
+        if (existing != -1)
+        {
+            // book already exists   just add the new copies to the stock
+            int oldTotal = books[existing].getTotal();
+            int oldAvail = books[existing].getAvailable();
+            int oldIssued = books[existing].getTimesIssued();
+            books[existing].setData(books[existing].getId(), books[existing].getTitle(),
+                books[existing].getAuthor(), isbn,
+                books[existing].getCategory(),
+                oldTotal + copies, oldAvail + copies, oldIssued);
+            saveBooks();
+            return "ISBN already exists. Added " + to_string(copies) + " more copies. Total now: " + to_string(oldTotal + copies) + ".";
+        }
+
+        if (bookCount >= MAX_BOOKS)
+            return "Book storage is full.";
+
+        books[bookCount].setData(nextBookId, title, author, isbn, cat, copies, copies, 0);
+        nextBookId++;
+        bookCount++;
+        saveBooks();
+        return "Book added successfully.";
+    }
+
+    string removeBook(string isbn)
+    {
+        int index = findBookByIsbn(isbn);
+        if (index == -1)
+            return "Book not found.";
+        if (books[index].getAvailable() != books[index].getTotal())
+            return "Cannot remove. Some copies are issued.";
+
+        for (int i = index; i < bookCount - 1; i++)
+            books[i] = books[i + 1];
+        bookCount--;
+        saveBooks();
+        return "Book removed.";
+    }
+
+
+    bool isValidDate(string date)
+    {
+        if ((int)date.length() != 10)
+            return false;
+        if (date[4] != '-' || date[7] != '-')
+            return false;
+
+        int y = toInt(date.substr(0, 4));
+        int m = toInt(date.substr(5, 2));
+        int d = toInt(date.substr(8, 2));
+
+        if (y < 2000 || y > 2100)
+            return false;
+        if (m < 1 || m > 12)
+            return false;
+        if (d < 1 || d > 31)
+            return false;
+
+        return true;
+    }
+    int currentBorrowed(string username)
+    {
+        int total = 0;
+        for (int i = 0; i < recordCount; i++)
+            if (records[i].username == username && records[i].returned == 0)
+                total++;
+        return total;
+    }
+
+    string issueBook(string username, string isbn, string date)
+    {
+        if (!isValidDate(date))
+            return "Invalid date. Use YYYY-MM-DD format (month 1-12, day 1-31, year 2000-2100).";
+        int mi = findMember(username);
+        int bi = findBookByIsbn(isbn);
+        if (mi == -1)
+            return "Member not found.";
+        if (bi == -1)
+            return "Book not found.";
+        if (members[mi].getFine() > 0)
+            return "Member has pending fine. Clear fine first.";
+        if (currentBorrowed(username) >= settings.maxBooks)
+            return "Maximum book limit reached.";
+        if (!books[bi].issue())
+            return "No copy available. You can reserve it.";
+        if (recordCount >= MAX_RECORDS)
+            return "Record storage full.";
+
+        records[recordCount].id = nextRecordId++;
+        records[recordCount].username = username;
+        records[recordCount].isbn = isbn;
+        records[recordCount].issueDate = date;
+        records[recordCount].dueDate = addDays(date, 14);
+        records[recordCount].returnDate = "";
+        records[recordCount].returned = 0;
+        recordCount++;
+        members[mi].increaseIssued();
+        saveAll();
+        return "Book issued. Due date: " + addDays(date, 14);
+    }
+
+    string returnBook(string username, string isbn, string date)
+    {
+        if (!isValidDate(date))
+            return "Invalid date. Use YYYY-MM-DD format (month 1-12, day 1-31, year 2000-2100).";
+        // return date must be after the issue date
+        for (int _check = 0; _check < recordCount; _check++)
+        {
+            if (records[_check].username == username && records[_check].isbn == isbn && records[_check].returned == 0)
+            {
+                if (dateToDays(date) < dateToDays(records[_check].issueDate))
+                    return "Return date cannot be before the issue date.";
+                break;
+            }
+        }
+        int bi = findBookByIsbn(isbn);
+        int mi = findMember(username);
+        if (bi == -1 || mi == -1)
+            return "Member or book not found.";
+
+        for (int i = 0; i < recordCount; i++)
+        {
+            if (records[i].username == username && records[i].isbn == isbn && records[i].returned == 0)
+            {
+                records[i].returned = 1;
+                records[i].returnDate = date;
+                books[bi].returnCopy();
+
+                int late = dateToDays(date) - dateToDays(records[i].dueDate);
+                string msg = "Book returned.";
+                if (late > 0)
+                {
+                    double amount = late * settings.fineRate;
+                    members[mi].addFine(amount);
+                    msg = "Returned late. Fine added: Rs. " + to_string((int)amount);
+                }
+
+                string nextUser = nextReservation(isbn);
+                if (nextUser != "")
+                    msg = msg + "\nReservation alert: notify " + nextUser;
+
+                saveAll();
+                return msg;
+            }
+        }
+        return "No active issue record found.";
+    }
+
+    string clearFine(string username)
+    {
+        int mi = findMember(username);
+        if (mi == -1)
+            return "Member not found.";
+        members[mi].clearFine();
+        saveMembers();
+        return "Fine cleared.";
+    }
+
+    string reserveBook(string username, string isbn, string date)
+    {
+        if (findMember(username) == -1)
+            return "Member not found.";
+        if (findBookByIsbn(isbn) == -1)
+            return "Book not found.";
+        if (reservationCount >= MAX_RESERVATIONS)
+            return "Reservation storage full.";
+
+        for (int i = 0; i < reservationCount; i++)
+            if (reservations[i].username == username && reservations[i].isbn == isbn && reservations[i].active == 1)
+                return "Already reserved by this member.";
+
+        reservations[reservationCount].username = username;
+        reservations[reservationCount].isbn = isbn;
+        reservations[reservationCount].date = date;
+        reservations[reservationCount].active = 1;
+        reservationCount++;
+        saveReservations();
+        return "Book reserved.";
+    }
+
+    string nextReservation(string isbn)
+    {
+        for (int i = 0; i < reservationCount; i++)
+        {
+            if (reservations[i].isbn == isbn && reservations[i].active == 1)
+            {
+                reservations[i].active = 0;
+                saveReservations();
+                return reservations[i].username;
+            }
+        }
+        return "";
+    }
+
+    bool hasReturned(string username, string isbn)
+    {
+        for (int i = 0; i < recordCount; i++)
+            if (records[i].username == username && records[i].isbn == isbn && records[i].returned == 1)
+                return true;
+        return false;
+    }
+
+    string addReview(string username, string isbn, int rating, string comment)
+    {
+        if (rating < 1 || rating > 5)
+            return "Rating must be from 1 to 5.";
+        if (!hasReturned(username, isbn))
+            return "Review allowed only after returning book.";
+        if (reviewCount >= MAX_REVIEWS)
+            return "Review storage full.";
+
+        // one review per user per book   update if already exists
+        for (int i = 0; i < reviewCount; i++)
+        {
+            if (reviews[i].username == username && reviews[i].isbn == isbn)
+            {
+                reviews[i].rating = rating;
+                reviews[i].comment = comment;
+                saveReviews();
+                return "Review updated.";
+            }
+        }
+
+        reviews[reviewCount].username = username;
+        reviews[reviewCount].isbn = isbn;
+        reviews[reviewCount].rating = rating;
+        reviews[reviewCount].comment = comment;
+        reviewCount++;
+        saveReviews();
+        return "Review saved.";
+    }
+
+    string deleteReview(string isbn)
+    {
+        for (int i = 0; i < reviewCount; i++)
+        {
+            if (reviews[i].isbn == isbn)
+            {
+                for (int j = i; j < reviewCount - 1; j++)
+                    reviews[j] = reviews[j + 1];
+                reviewCount--;
+                saveReviews();
+                return "One review deleted.";
+            }
+        }
+        return "No review found.";
+    }
+
+    string listBooks(string key)
+    {
+        string ans = "Books:\n";
+        int found = 0;
+        key = lowerText(key);
+
+        for (int i = 0; i < bookCount; i++)
+        {
+            string all = lowerText(books[i].getTitle() + " " + books[i].getAuthor() + " " +
+                books[i].getIsbn() + " " + books[i].getCategory());
+            if (key == "" || all.find(key) != string::npos)
+            {
+                ans += books[i].getTitle() + " | " + books[i].getAuthor() +
+                    " | ISBN: " + books[i].getIsbn() +
+                    " | " + books[i].getCategory() +
+                    " | Available: " + to_string(books[i].getAvailable()) + "/" +
+                    to_string(books[i].getTotal()) + "\n";
+                found++;
+            }
+        }
+
+        if (found == 0)
+            ans += "No books found.\n";
+        return ans;
+    }
+
+    string listMembers()
+    {
+        string ans = "Members:\n";
+        for (int i = 0; i < memberCount; i++)
+        {
+            Person* person = &members[i];
+            ans += getPersonRole(person) + " | " + members[i].getUsername() + " | " + members[i].getFullName() +
+                " | Card: " + members[i].getCardNumber() +
+                " | Fine: Rs. " + to_string((int)members[i].getFine()) +
+                " | Total issued: " + to_string(members[i].getTotalIssued()) + "\n";
+        }
+        if (memberCount == 0)
+            ans += "No members registered.\n";
+        return ans;
+    }
+
+    string memberDashboard(string username)
+    {
+        int mi = findMember(username);
+        if (mi == -1)
+            return "Member not found.";
+
+        string ans = "Welcome " + members[mi].getFullName() + "\n";
+        ans += "Role: " + getPersonRole(&members[mi]) + "\n";
+        ans += "Library Card: " + members[mi].getCardNumber() + " (" + members[mi].getCardStatus() + ")\n";
+        ans += "Outstanding fine: Rs. " + to_string((int)members[mi].getFine()) + "\n";
+        ans += "Borrowed books:\n";
+
+        bool found = false;
+        for (int i = 0; i < recordCount; i++)
+        {
+            if (records[i].username == username)
+            {
+                found = true;
+                int bookIndex = findBookByIsbn(records[i].isbn);
+                if (bookIndex != -1)
+                {
+                    BorrowInfo info;
+                    info.set(&members[mi], &books[bookIndex], &records[i]);
+                    ans += info.getLine() + "\n";
+                }
+                else
+                {
+                    ans += records[i].isbn + " | Issue: " + records[i].issueDate +
+                        " | Due: " + records[i].dueDate + "\n";
+                }
+            }
+        }
+
+        if (!found)
+            ans += "No borrowing history.\n";
+        return ans;
+    }
+
+    string reviewsForBook(string isbn)
+    {
+        string ans = "Reviews for ISBN " + isbn + ":\n";
+        int total = 0;
+        int found = 0;
+
+        for (int i = 0; i < reviewCount; i++)
+        {
+            if (reviews[i].isbn == isbn)
+            {
+                ans += reviews[i].username + " rated " + to_string(reviews[i].rating) +
+                    "/5: " + reviews[i].comment + "\n";
+                total += reviews[i].rating;
+                found++;
+            }
+        }
+
+        if (found == 0)
+            ans += "No reviews yet.\n";
+        else
+            ans += "Average rating: " + to_string(total / found) + "/5\n";
+        return ans;
+    }
+
+    string leaderboard()
+    {
+        Member temp[MAX_MEMBERS];
+        for (int i = 0; i < memberCount; i++)
+            temp[i] = members[i];
+
+        for (int i = 0; i < memberCount - 1; i++)
+        {
+            for (int j = i + 1; j < memberCount; j++)
+            {
+                if (temp[j].getTotalIssued() > temp[i].getTotalIssued())
+                {
+                    Member swap = temp[i];
+                    temp[i] = temp[j];
+                    temp[j] = swap;
+                }
+            }
+        }
+
+        string ans = "Most Active Borrowers:\n";
+        int limit = memberCount;
+        if (limit > 10)
+            limit = 10;
+
+        for (int i = 0; i < limit; i++)
+            ans += to_string(i + 1) + ". " + temp[i].getUsername() +
+            " - " + to_string(temp[i].getTotalIssued()) + " books\n";
+        return ans;
+    }
+
+    string reports()
+    {
+        ReportData data;
+        data.totalBooks = bookCount;
+        data.totalMembers = memberCount;
+
+        for (int i = 0; i < recordCount; i++)
+        {
+            if (records[i].returned == 0)
+                data.issuedNow++;
+            else
+                data.returned++;
+        }
+
+        for (int i = 0; i < memberCount; i++)
+            data.totalFine += members[i].getFine();
+
+        int maxIssued = -1;
+        for (int i = 0; i < bookCount; i++)
+        {
+            if (books[i].getTimesIssued() > maxIssued)
+            {
+                maxIssued = books[i].getTimesIssued();
+                data.topBook = books[i].getTitle();
+            }
+        }
+
+        return data.makeText();
+    }
+    int runLibraryGUI(int argc, char* argv[]);
+
+    int main(int argc, char* argv[])
+    {
+        return runLibraryGUI(argc, argv);
+    }
+
+};
 
 #endif

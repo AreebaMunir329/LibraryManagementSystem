@@ -1,4 +1,6 @@
-#include<iostream>
+#ifndef BOOK_MANAGEMENT_CPP 
+#define BOOK_MANAGEMENT_CPP 
+
 #include<fstream>
 #include<string>
 #include<Fine.h>
@@ -15,10 +17,11 @@ class book {
 	string category;
 	int totalcpy;
 	int availablecpy;
+	int timesIssued;
 public:
 	//ctr
-	book() : id(0), name(""), author(""), isbn(""), category(""), totalcpy(0), availablecpy(0) {}
-	book(int id, string n, string a, string i, string cat, int cpy) : id(id), name(n), author(a), isbn(i), category(cat), totalcpy(cpy), availablecpy(cpy) {}
+	book() : id(0), name(""), author(""), isbn(""), category(""), totalcpy(0), availablecpy(0), timesIssued(0) {}
+	book(int id, string n, string a, string i, string cat, int cpy, int t_issued) : id(id), name(n), author(a), isbn(i), category(cat), totalcpy(cpy), availablecpy(cpy), timesIssued(t_issued) {}
 
 	// getters
 	int getid() const
@@ -49,7 +52,10 @@ public:
 	{
 		return availablecpy;
 	}
-
+	void gettimesissued() const
+	{
+		return timesIssued;
+	}
 	//setters
 	void setavailablecpy(int cpy)
 	{
@@ -59,6 +65,7 @@ public:
 	{
 		totalcpy = cpy;
 	}
+
 
 	//display
 	void display() const
@@ -87,7 +94,8 @@ public:
 		{
 			return false;
 		}
-		availablecpy++;
+		availablecpy--;
+		timesIssued++;
 		return true;
 	}
 
@@ -716,3 +724,4 @@ public:
 		}
 	};
 
+#endif

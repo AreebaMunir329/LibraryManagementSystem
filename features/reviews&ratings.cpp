@@ -368,6 +368,7 @@ void reviewmenu(review revs[], int& count, bool isAdmin)
 	cout << "---------------------------------------" << endl;
 }
 
+<<<<<<< HEAD
 int main()
 {
 	review reviews[MAX_REVIEWS];
@@ -397,3 +398,6 @@ int main()
 		reviewmenu(reviews, count, isAdmin);
 		return 0;
 }
+=======
+
+>>>>>>> 4930aa557a0adfc9208fcdfcc09213943ec94a83

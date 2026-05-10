@@ -35,6 +35,7 @@ cmake_install.cmake
 
 # Data files your program generates at runtime
 <<<<<<< HEAD
+<<<<<<< HEAD
 users.txt
 fines.txt
 transactions.txt
@@ -44,6 +45,8 @@ settings.txt
 categories.txt
 =======
 >>>>>>> 35dd95190cb727c264d6adb55995500e0954a52d
+=======
+>>>>>>> 4930aa557a0adfc9208fcdfcc09213943ec94a83
 *.bak_*
 report*.txt
 
@@ -104,3 +107,5 @@ ipch/
 # Visual Studio coverage
 *.coverage
 *.coveragexml
+
+LibraryManagementSystem/

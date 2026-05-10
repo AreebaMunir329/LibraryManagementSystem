@@ -1,35 +1,7 @@
-#include<iostream>
-#include"features/bookmanagement.cpp"
-#include "features/reviews&ratings.cpp"
-#include "features/Settings&leaderboard.cpp"
+int runLibraryGUI(int argc, char* argv[]);
 
-int main()
+int main(int argc, char* argv[])
 {
-	//bookmanager 
-	bookmanager obj;
-	obj.menu(true);
-
-	//reviews & ratings
-	review reviews[MAX_REVIEWS];
-	int count = 0;
-
-	loadreviews(reviews, count);
-
-	string role;
-	cout << "Login as (admin/member): ";
-	cin >> role;
-
-	while (role != "Admin" && role != "admin" && role != "member" && role != "Member")
-	{
-		cout << "Invalid entry. Try again: ";
-		cin >> role;
-	}
-	bool isAdmin;
-	if (role == "Admin" || role == "admin")
-	{
-		isAdmin = true;
-	}
-
-	reviewmenu(reviews, count, isAdmin);
-	return 0;
+    return runLibraryGUI(argc, argv);
 }
+

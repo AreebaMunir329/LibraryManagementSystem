@@ -1,135 +1,111 @@
-#include<iostream>
-#include<fstream>
-#include<string>
-#include<Fine.h>
+#ifndef BOOK_MANAGEMENT_CPP
+#define BOOK_MANAGEMENT_CPP
+
+#include <fstream>
+#include <string>
 using namespace std;
 
-const int MAXBOOKS = 200;   //maximum capacity of library
+class Book
+{
+    int id;
+    string title;
+    string author;
+    string isbn;
+    string category;
+    int totalCopies;
+    int availableCopies;
+    int timesIssued;
 
-//deals with data of one book
-class book {
-	int id;
-	string name;
-	string author;
-	string isbn;
-	string category;
-	int totalcpy;
-	int availablecpy;
 public:
-	//ctr
-	book() : id(0), name(""), author(""), isbn(""), category(""), totalcpy(0), availablecpy(0) {}
-	book(int id, string n, string a, string i, string cat, int cpy) : id(id), name(n), author(a), isbn(i), category(cat), totalcpy(cpy), availablecpy(cpy) {}
+    Book()
+    {
+        id = 0;
+        title = "";
+        author = "";
+        isbn = "";
+        category = "";
+        totalCopies = 0;
+        availableCopies = 0;
+        timesIssued = 0;
+    }
 
-	// getters
-	int getid() const
-	{
-		return id;
-	}
-	string getname() const
-	{
-		return name;
-	}
-	string getauthor() const
-	{
-		return author;
-	}
-	string getisbn() const
-	{
-		return isbn;
-	}
-	string getcategory() const
-	{
-		return category;
-	}
-	int gettotalcpy() const
-	{
-		return totalcpy;
-	}
-	int getavailablecpy() const
-	{
-		return availablecpy;
-	}
+    void setData(int i, string t, string a, string is, string c, int total, int avail, int issued)
+    {
+        id = i;
+        title = t;
+        author = a;
+        isbn = is;
+        category = c;
+        totalCopies = total;
+        availableCopies = avail;
+        timesIssued = issued;
+    }
 
-	//setters
-	void setavailablecpy(int cpy)
-	{
-		availablecpy = cpy;
-	}
-	void settotalcpy(int cpy)
-	{
-		totalcpy = cpy;
-	}
+    int getId()
+    {
+        return id;
+    }
 
-	//display
-	void display() const
-	{
-		cout << "ID: " << id << endl;
-		cout << "Title: " << name << endl;
-		cout << "Author: " << author << endl;
-		cout << "ISBN: " << isbn << endl;
-		cout << "Category: " << category << endl;
-		cout << "Available copies: " << availablecpy << "/" << totalcpy << endl;
-		cout << "------------------------------------------------------------" << endl;
-	}
+    string getTitle()
+    {
+        return title;
+    }
 
-	//functionality
-	void returnbook()  // called when a book is returned
-	{
-		if (totalcpy > availablecpy)
-		{
-			availablecpy++;  //increase available by one
-		}
-	}
+    string getAuthor()
+    {
+        return author;
+    }
 
-	bool issuebook()  //called when a book is issued
-	{
-		if (availablecpy <= 0) //when no copies are available
-		{
-			return false;
-		}
-		availablecpy++;
-		return true;
-	}
+    string getIsbn()
+    {
+        return isbn;
+    }
 
-	//file handling
-	void dataentry(ofstream& out) const
-	{
-		out << id << "|" << name << "|" << author << "|" << isbn << "|" << category << "|" << totalcpy << "|" << availablecpy << endl;
-	}
-	bool read(const string& line)  //receives a line from file 
-	{
-		string data[7];  //7 vars
-		int index = 0;
-		string input = "";
-		for (int i = 0; i < (int)line.size(); i++)
-		{
-			if (line[i] == '|') //separator found (value of one variable is stored)
-			{
-				if (index >= 7) return false;   //edge-case handling
-				data[index++] = input;  //assigns stored value
-				input = "";
-			}
-			else  //keeps adding char until hits a '|' 
-			{
-				input += line[i];
-			}
-		}
-		data[index++] = input;  //assigns val of last var
+    string getCategory()
+    {
+        return category;
+    }
 
-		if (index != 7) return false;  //indicates smth is wrong
+    int getAvailable()
+    {
+        return availableCopies;
+    }
 
-		//manually assigning val to vars
-		id = stoi(data[0]);  //used inbuilt function because the code is already lengthy
-		name = data[1];
-		author = data[2];
-		isbn = data[3];
-		category = data[4];
-		totalcpy = stoi(data[5]);
-		availablecpy = stoi(data[6]);
-		return true;
-	}
+    int getTotal()
+    {
+        return totalCopies;
+    }
+
+    int getTimesIssued()
+    {
+        return timesIssued;
+    }
+
+    bool issue()
+    {
+        if (availableCopies <= 0)
+            return false;
+
+        availableCopies--;   //reduces available copies by 1
+        timesIssued++;   //increments total issues for the person
+        return true;
+    }
+
+    void returnCopy()
+    {
+        if (availableCopies < totalCopies)
+            availableCopies++;
+    }
+
+    void save(ofstream& out)
+    {
+        out << id << "|" << title << "|" << author << "|" << isbn << "|"
+            << category << "|" << totalCopies << "|" << availableCopies << "|"
+            << timesIssued << endl;
+    }
 };
 
+<<<<<<< HEAD
 void loadfiledata()  //loading file data into books arr
 {
 	count = 0;
@@ -769,3 +745,6 @@ public:
 >>>>>>> 4930aa557a0adfc9208fcdfcc09213943ec94a83
 	};
 
+=======
+#endif
+>>>>>>> c01835e2dfe92bacf207fc84bab7b76517eae209
